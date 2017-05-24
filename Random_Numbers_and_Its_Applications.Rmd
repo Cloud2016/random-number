@@ -193,7 +193,7 @@ $$p_2(x)=\frac{1}{2 \pi}\int_{-\infty}^{+\infty}\mathrm{e}^{-itx}\varphi_2(t)\ma
 =\frac{2}{\pi}\int_{0}^{+\infty}\frac{(1-\cos(t))\cos(t(1-x))}{t^2}\mathrm{d}t
 =\frac{2}{\pi}\int_{0}^{+\infty}\cos\big(2(1-x)t\big)\big(\frac{\sin(t)}{t}\big)^2\mathrm{d}t$$
 一般地，$n$个独立随机变量的和
-$$\varphi_n(t)=\big(\frac{e^{it}-1}{it}\big)^n=\big(\frac{\sin^{n}(t/2)\mathrm{e}^{\frac{it}{2}}}{t/2}\big)^n$$
+$$\varphi_n(t)=\big(\frac{e^{it}-1}{it}\big)^n=\big(\frac{\sin(t/2)\mathrm{e}^{\frac{it}{2}}}{t/2}\big)^n$$
 那么，同理 
 $$p_n(x)=\frac{2}{\pi}\int_{0}^{+\infty}\cos\big(2(n/2-x)t\big)(\frac{\sin(t)}{t})^n\mathrm{d}t$$
 
