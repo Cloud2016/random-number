@@ -6,7 +6,6 @@ output:
   pdf_document:
    latex_engine: xelatex
    number_sections: yes
-
 CJKmainfont: FandolSong
 mainfont: DejaVu Sans
 monofont: DejaVu Sans Mono
@@ -99,29 +98,23 @@ runs.test(factor(x))
 我们现在拿Matlab早期随机数发生器、R内置的Mersenne-Twister发生器和C语言实现的Mersenne-Twister发生器比较，程序实现仿Matlab 版的游程检验^[<https://www.mathworks.com/content/dam/mathworks/mathworks-dot-com/moler/random.pdf>]。
 
 ```{r,fig.height=3,fig.width=9,fig.align='center'}
+# 游程频数直方图
+run_test_fun <- function(x,string,delta) {
+  n <- length(x)
+  len <- diff(c(0,which(x<delta),n+1))-1 
+  ggplot(data.frame(x=len[len < 101]),aes(x,fill=..count..)) + 
+  	scale_fill_viridis(direction = -1)+ 
+  	geom_histogram(binwidth = 1,show.legend = FALSE) + 
+  	xlab(string)+ylab("") 
+}
 set.seed(1234) # R默认采用Mersenne Twister发生器
-n <- 2^24; 
-x <- runif(n,0,1); # R内生成均匀分布随机数
-delta <- 0.01 
-len <- diff(c(0,which(x<delta),n+1))-1 
-p1 <- ggplot(data.frame(x=len[len < 101]),aes(x,fill=..count..)) + 
-	scale_fill_viridis(direction = -1)+ 
-	geom_histogram(binwidth = 1,show.legend = FALSE) + 
-	xlab("R")+ylab("") 
-dat <- readMat("random_number.mat") # 读取Octave生成的均匀分布随机数  
-x <- dat$x 
-len <- diff(c(0,which(x<delta),n+1))-1 
-p2 <- ggplot(data.frame(x=len[len < 101]),aes(x,fill=..count..)) + 
-	scale_fill_viridis(direction = -1)+ 
-	geom_histogram(binwidth = 1,show.legend = FALSE) + 
-	xlab("Matlab v5/Octave")+ylab("") 
-y <- read.table(file = "random_number.txt") # 读取C语言生成的均匀分布随机数 
-y <- c(as.matrix(t(y)))
-len <- diff(c(0,which(y<delta),n+1))-1 
-p3 <- ggplot(data.frame(x=len[len < 101]),aes(x,fill=..count..)) + 
-	scale_fill_viridis(direction = -1)+ 
-	geom_histogram(binwidth = 1,show.legend = FALSE) + 
-	xlab("C")+ylab("") 
+r_data <- runif(2^24,0,1); # R内生成均匀分布随机数
+matlabv5_data <- readMat("random_number.mat") # 读取Octave生成的均匀分布随机数
+temp <- read.table(file = "random_number.txt") # 读取C语言生成的均匀分布随机数 
+c_data <- c(as.matrix(t(temp)))
+p1 <- run_test_fun(x = r_data,string = "R",delta = 0.01)
+p2 <- run_test_fun(x = matlabv5_data$x,string = "Matlab v5",delta = 0.01)
+p3 <- run_test_fun(x = c_data,string = "C",delta = 0.01)
 grid.arrange(p1, p2, p3, ncol=3)
 ```
 
