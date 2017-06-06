@@ -8,15 +8,9 @@ slug: random number generation and its application to statistical simulation
 
 # 引言
 
-随机数是统计模拟的基础，均匀分布随机数又是其中最重要的，因为由均匀分布随机数可以产生其它分布的随机数，所以好的随机数发生器，其实指的就是一个高质量、高效的均匀分布随机数发生器。高质量就是经得起纯随机性检验，高效就是要产生速度快。话不多说，先加载一些必要的*R*包。
+随机数是统计模拟的基础，均匀分布随机数又是其中最重要的，因为由均匀分布随机数可以产生其它分布的随机数，所以好的随机数发生器，其实指的就是一个高质量、高效的均匀分布随机数发生器。高质量就是经得起纯随机性检验，高效就是要产生速度快。
 
-```r
-library(ggplot2)
-library(viridisLite)
-library(viridis) 
-library(gridExtra)
-library(R.matlab)
-```
+随机数的产生和检验方法是蒙特卡罗方法的重要部分，另外两个是概率分布抽样方法和降低方差提高效率方法，而蒙特卡罗方法是于20世纪40年代中期开创的，当时为了原子弹的研制，乌拉姆（S.Ulam）、冯诺依曼（J.von Neumann）和梅特罗波利斯（N. Metropolis）在美国核武器研究实验室研究蒙特卡罗方法
 
 
 # 随机数生成
@@ -49,6 +43,9 @@ save -mat random_number.mat x # 保存随机数到文件
 先来一个简单的，就用 *R* 产生的两个独立同均匀分布样本，调用 **cor.test** 做相关性检验，然后眼球验证一下，随着样本量增大，相关性趋于0。
 
 ```r
+library(ggplot2)
+library(viridisLite)
+library(viridis)
 set.seed(1234)
 corr <- rep(0,1000) 
 for(i in seq(from=1000,to=1000000,by=1000)){  
@@ -106,6 +103,8 @@ runs.test(factor(x))
 我们现在拿 *Matlab* 早期随机数发生器、*R* 内置的Mersenne-Twister发生器和*C*语言实现的Mersenne-Twister发生器比较，程序实现仿[*Matlab*版的游程检验](https://www.mathworks.com/content/dam/mathworks/mathworks-dot-com/moler/random.pdf)。
 
 ```r
+library(gridExtra)
+library(R.matlab)
 # 游程频数直方图
 run_test_fun <- function(x,string,delta) {
   n <- length(x)
@@ -281,44 +280,5 @@ integrate 2/pi*cos(2*t*(1-x))*(sin(t)/t)^2 ,t ,0,oo
 ```
 
 即可得`$p_2(x)=\frac{1}{2}(\left | x-2 \right |-2\left | x-1 \right |+\left | x \right |)$`，`$n$` 取任意值都是可以算的，由于式子比较复杂，就不展示了。
-
-
-# 软件信息
-
-```r
-sessionInfo()
-## R version 3.4.0 (2017-04-21)
-## Platform: x86_64-w64-mingw32/x64 (64-bit)
-## Running under: Windows 8.1 x64 (build 9600)
-##
-## Matrix products: default
-##
-## locale:
-## [1] LC_COLLATE=Chinese (Simplified)_China.936
-## [2] LC_CTYPE=Chinese (Simplified)_China.936
-## [3] LC_MONETARY=Chinese (Simplified)_China.936
-## [4] LC_NUMERIC=C
-## [5] LC_TIME=Chinese (Simplified)_China.936
-##
-## attached base packages:
-## [1] stats graphics grDevices utils datasets methods base
-##
-## other attached packages:
-## [1] tseries_0.10-40 hexbin_1.27.1 R.matlab_3.6.1 gridExtra_2.2.1
-## [5] viridis_0.4.0 viridisLite_0.2.0 ggplot2_2.2.1
-##
-## loaded via a namespace (and not attached):
-## [1] Rcpp_0.12.10 knitr_1.15.1 magrittr_1.5
-## [4] munsell_0.4.3 lattice_0.20-35 colorspace_1.3-2
-## [7] quadprog_1.5-5 stringr_1.2.0 plyr_1.8.4
-## [10] tools_3.4.0 grid_3.4.0 gtable_0.2.0
-## [13] R.oo_1.21.0 htmltools_0.3.6 yaml_2.1.14
-## [16] lazyeval_0.2.0 rprojroot_1.2 digest_0.6.12
-## [19] tibble_1.3.0 codetools_0.2-15 R.utils_2.5.0
-## [22] evaluate_0.10 rmarkdown_1.5 labeling_0.3
-## [25] stringi_1.1.5 compiler_3.4.0 scales_0.4.1
-## [28] backports_1.0.5 R.methodsS3_1.7.1 zoo_1.8-0
-```
-
 
 
