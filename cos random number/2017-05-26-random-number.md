@@ -8,10 +8,11 @@ slug: random number generation and its application to statistical simulation
 
 # 引言
 
-随机数是统计模拟的基础，均匀分布随机数又是其中最重要的，因为由均匀分布随机数可以产生其它分布的随机数，所以好的随机数发生器，其实指的就是一个高质量、高效的均匀分布随机数发生器。高质量就是经得起纯随机性检验，高效就是要产生速度快。
+揭秘统计软件如R，Octave，Matlab等使用的随机数发生器，然后做一些统计检验，再将其应用到独立随机变量和的模拟中，最后与符号计算得到的精确结果比较。
 
-随机数的产生和检验方法是蒙特卡罗方法的重要部分，另外两个是概率分布抽样方法和降低方差提高效率方法，而蒙特卡罗方法是于20世纪40年代中期开创的，当时为了原子弹的研制，乌拉姆（S.Ulam）、冯诺依曼（J.von Neumann）和梅特罗波利斯（N. Metropolis）在美国核武器研究实验室研究蒙特卡罗方法
+# 背景
 
+随机数的产生和检验方法是蒙特卡罗方法的重要部分，另外两个是概率分布抽样方法和降低方差提高效率方法。在20世纪40年代中期，当时为了原子弹的研制，乌拉姆（S.Ulam）、冯诺依曼（J.von Neumann） 和梅特罗波利斯（N. Metropolis） 在美国核武器研究实验室创立蒙特卡罗方法。BTW，当时出于保密的需要，随机模拟的方法和理论取名蒙特卡罗。早期取得的成果有产生随机数的平方取中方法，取舍算法和逆变换法等。[见统计之都王夜笙的文章](http://cos.name/2015/06/generating-normal-distr-variates/)
 
 # 随机数生成
 
@@ -36,6 +37,15 @@ toc (id)
 save -mat random_number.mat x # 保存随机数到文件
 ```
 
+目前Matlab和Octave产生随机数的代码是一样的，内置的随机数发生器也是一样的
+```octave
+rand(m,n) % 产生m行n列的服从标准均与分布的随机数 
+```
+R产生随机数的代码也是简短，默认的随机数发生器也是MT。
+```r
+runif(n) # 产生n个服从标准均匀分布的随机数
+```
+
 # 统计检验
 
 ## 相关性检验
@@ -56,7 +66,7 @@ ggplot(data.frame(x = seq(1000), y = corr), aes(x = x, y = y)) +
 	scale_fill_viridis(direction = -1) + xlab("Sample size *10^3")+ylab("Correlation") 
 ```
 
-![fig1](/figures/img1.png)
+![fig1](/figures/img1.svg)
 
 ## 分布检验
 
@@ -124,9 +134,12 @@ p2 <- run_test_fun(x = matlabv5_data$x,string = "Matlab v5",delta = 0.01)
 p3 <- run_test_fun(x = c_data,string = "C",delta = 0.01)
 grid.arrange(p1, p2, p3, ncol=3)
 ```
-![fig2](/figures/img2.png)
+![fig2](/figures/img2.svg)
 
 在游程长度为27的位置，有一条深沟，这是George Marsaglia 提出的借位相减（subtract-with-borrow）算法的特性，显然不符合随机性的要求，该算法细节参见[Cleve B. Moler的书《Numerical Computing with MATLAB》第9章第267页](https://www.mathworks.com/moler/chapters.html) 。
+
+借位相减是指序列的第`$i$`个随机数`$z_{i}$`要依据如下递推关系产生，`$$z_i=z_{i+20}-z_{i+5}-b$$`
+下标`$i,i+20,i+5$`都是对32取模的结果，`$b$`的取值与前一步有关，当`$z_i$`是正值时，下一步将`$b$`置为0，如果计算的`$z_i$`是负值，在保存`$z_i$`之前，将其值加1，并在下一步，将`$b$`的值设为`$2^{-53}$`。
 
 # 应用
 
@@ -150,7 +163,7 @@ ggplot(data.frame(x = seq(10000), y = z), aes(x = x, y = y)) +
 	geom_hex(show.legend=FALSE)+ 
 	scale_fill_viridis(direction = -1) + xlab("")+ylab("")
 ```
-![fig2](/figures/img3.png)
+![fig2](/figures/img3.svg)
 
 显然这不是均匀分布，在 `$z=1$` 处，散点比较集中，看起来有点像正态分布，如果往中心极限定理上靠，将作如下标准化`$$Y_{2}^{\star}=\frac{X_1 + X_2 - 2*\frac{1}{2}}{\sqrt{\frac{1}{12}}*\sqrt{2}}=\sqrt{6}(X_1 + X_2 -1)$$` 则$Y_{2}^{\star}$的期望为0，方差为1。
 
@@ -163,7 +176,7 @@ p5 <- ggplot(data.frame(x=sqrt(6)*(z-1)),aes(x,fill=..count..))+
 	geom_histogram(bins=20,show.legend=FALSE) + xlab("")+ylab("")  
 grid.arrange(p4, p5,  ncol=2)
 ```
-![fig2](/figures/img4.png)
+![fig2](/figures/img4.svg)
 
 只是变换后的图像和之前基本一致，那么现在看来眼球检验不好使了，那就上`$P$`值呗！
 
@@ -228,7 +241,7 @@ ggplot(data.frame(x = c(0, 2)), aes(x = x)) +
     stat_function(fun = fun_p2_1, geom = "line", colour = "#78D152FF") 
 ```
 
-![fig2](/figures/img5.png)
+![fig2](/figures/img5.svg)
 
 从图中可以看出，两种形式的密度函数在数值计算的结果上很一致，当`$n=100,1000$`时，含参量积分的表示形式就很方便啦！任意给定一个`$n$`，符号计算上面的含参量积分，这个时候还是用软件计算比较合适，*R*的符号计算仅限于求导，积分运算需要借助Ryacas，rSymPy，可惜的是，这些包更新缓慢，即使 `$\int_{0}^{+\infty}\frac{\sin(at)}{t}\mathrm{d}t$`也算不出来，果断直接使用*Python*的sympy模块
 
