@@ -2,7 +2,7 @@
 title: 随机数生成及其在统计模拟中的应用
 date: '2017-05-26'
 author: 黄湘云
-tags: [随机数,统计检验，模拟] 
+tags: [随机数,统计检验，模拟]
 slug: random number generation and its application to statistical simulation
 ---
 
@@ -12,13 +12,13 @@ slug: random number generation and its application to statistical simulation
 
 # 背景
 
-随机数的产生和检验方法是蒙特卡罗方法的重要部分，另外两个是概率分布抽样方法和降低方差提高效率方法。在20世纪40年代中期，当时为了原子弹的研制，乌拉姆（S.Ulam）、冯诺依曼（J.von Neumann） 和梅特罗波利斯（N. Metropolis） 在美国核武器研究实验室创立蒙特卡罗方法。BTW，当时出于保密的需要，随机模拟的方法和理论取名蒙特卡罗。早期取得的成果有产生随机数的平方取中方法，取舍算法和逆变换法等。[见统计之都王夜笙的文章](http://cos.name/2015/06/generating-normal-distr-variates/)
+随机数的产生和检验方法是蒙特卡罗方法的重要部分，另外两个是概率分布抽样方法和降低方差提高效率方法。在20世纪40年代中期，当时为了原子弹的研制，乌拉姆（S.Ulam）、冯诺依曼（J.von Neumann） 和梅特罗波利斯（N. Metropolis） 在美国核武器研究实验室创立蒙特卡罗方法。BTW，当时出于保密的需要，与随机模拟相关的技术就代号“蒙特卡罗”。早期取得的成果有产生随机数的平方取中方法，取舍算法和逆变换法等。这两个算法的内容[见统计之都王夜笙的文章](http://cos.name/2015/06/generating-normal-distr-variates/)。
 
 # 随机数生成
 
-讲随机数发生器，不得不提及Mersenne Twister（简称MT），它的周期长达`$2^{19937}-1$`， 现在是R 、Octave 和Matlab 等软件（较新版本）的默认随机数发生器。 在产生`$2^{24}$`个随机数的过程中，[MT发生器的C语言64位版本](http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt64.html)，我在 Dev-C++ 5.11  上编译运行10秒左右。（由于整个代码比较长就不贴了）
+讲随机数发生器，不得不提及Mersenne Twister（简称MT），它的周期长达`$2^{19937}-1$`， 现在是R 、Octave 和Matlab 等软件（较新版本）的默认随机数发生器。 在产生`$2^{24}$`个随机数的过程中，[MT发生器的C语言64位版本](http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt64.html)，我在 Dev-C++ 5.11  上编译运行10秒左右（包含编译和写随机数到文件的时间，实际产生随机数的时间应该远小于这个时间）。
 
-Matlab新版本内置了早期的随机数发生器（这里以1995年的Matlab随机数发生器为例），两行代码就可以产生`$2^{24}$`个随机数。
+Matlab新版本内置了早期的随机数发生器（这里以1995年的Matlab随机数发生器为例），两行代码就可以产生 `$2^{24}$` 个随机数。
 
 ```matlab
 % matlab code % 大约几秒
@@ -31,15 +31,15 @@ x = rand(1,2^24);
 ```octave
 % octave code
 id = tic % 时间耗费大约一小时
-randtx("state",0) 
-x = randtx(1,2^24); 
-toc (id) 
+randtx("state",0)
+x = randtx(1,2^24);
+toc (id)
 save -mat random_number.mat x # 保存随机数到文件
 ```
 
 目前Matlab和Octave产生随机数的代码是一样的，内置的随机数发生器也是一样的
 ```octave
-rand(m,n) % 产生m行n列的服从标准均与分布的随机数 
+rand(m,n) % 产生m行n列的服从标准均与分布的随机数
 ```
 R产生随机数的代码也是简短，默认的随机数发生器也是MT。
 ```r
@@ -57,13 +57,13 @@ library(ggplot2)
 library(viridisLite)
 library(viridis)
 set.seed(1234)
-corr <- rep(0,1000) 
+corr <- rep(0,1000)
 for(i in seq(from=1000,to=1000000,by=1000)){  
 	corr[i/1000] <-  cor.test(runif(i,min = 0,max = 1),                            
-		runif(i,min = 0,max = 1))$estimate } 
+		runif(i,min = 0,max = 1))$estimate }
 ggplot(data.frame(x = seq(1000), y = corr), aes(x = x, y = y)) +   
-	geom_hex(show.legend=FALSE)+ 
-	scale_fill_viridis(direction = -1) + xlab("Sample size *10^3")+ylab("Correlation") 
+	geom_hex(show.legend=FALSE)+
+	scale_fill_viridis(direction = -1) + xlab("Sample size *10^3")+ylab("Correlation")
 ```
 
 ![fig1](/figures/img1.svg)
@@ -118,16 +118,16 @@ library(R.matlab)
 # 游程频数直方图
 run_test_fun <- function(x,string,delta) {
   n <- length(x)
-  len <- diff(c(0,which(x<delta),n+1))-1 
-  ggplot(data.frame(x=len[len < 101]),aes(x,fill=..count..)) + 
-  	scale_fill_viridis(direction = -1)+ 
-  	geom_histogram(binwidth = 1,show.legend = FALSE) + 
-  	xlab(string)+ylab("") 
+  len <- diff(c(0,which(x<delta),n+1))-1
+  ggplot(data.frame(x=len[len < 101]),aes(x,fill=..count..)) +
+  	scale_fill_viridis(direction = -1)+
+  	geom_histogram(binwidth = 1,show.legend = FALSE) +
+  	xlab(string)+ylab("")
 }
 set.seed(1234) # R默认采用Mersenne Twister发生器
 r_data <- runif(2^24,0,1); # R内生成均匀分布随机数
 matlabv5_data <- readMat("random_number.mat") # 读取Octave生成的均匀分布随机数
-temp <- read.table(file = "random_number.txt") # 读取C语言生成的均匀分布随机数 
+temp <- read.table(file = "random_number.txt") # 读取C语言生成的均匀分布随机数
 c_data <- c(as.matrix(t(temp)))
 p1 <- run_test_fun(x = r_data,string = "R",delta = 0.01)
 p2 <- run_test_fun(x = matlabv5_data$x,string = "Matlab v5",delta = 0.01)
@@ -138,7 +138,7 @@ grid.arrange(p1, p2, p3, ncol=3)
 
 在游程长度为27的位置，有一条深沟，这是George Marsaglia 提出的借位相减（subtract-with-borrow）算法的特性，显然不符合随机性的要求，该算法细节参见[Cleve B. Moler的书《Numerical Computing with MATLAB》第9章第267页](https://www.mathworks.com/moler/chapters.html) 。
 
-借位相减是指序列的第`$i$`个随机数`$z_{i}$`要依据如下递推关系产生，`$$z_i=z_{i+20}-z_{i+5}-b$$`
+这里的借位相减是指序列的第`$i$`个随机数`$z_{i}$`要依据如下递推关系产生，`$$z_i=z_{i+20}-z_{i+5}-b$$`
 下标`$i,i+20,i+5$`都是对32取模的结果，`$b$`的取值与前一步有关，当`$z_i$`是正值时，下一步将`$b$`置为0，如果计算的`$z_i$`是负值，在保存`$z_i$`之前，将其值加1，并在下一步，将`$b$`的值设为`$2^{-53}$`。
 
 # 应用
@@ -148,9 +148,9 @@ grid.arrange(p1, p2, p3, ncol=3)
 随机变量 `$X_{1},X_{2}\stackrel{iid}{\sim}$`某分布（比如二项分布，泊松分布，正态分布，指数分布，卡方分布，伽马分布），则`$X_{1}+X_{2}$`也服从该分布。常见的均匀分布是否具有这样的可加性？具体地说，就是`$X_{1},X_{2}\stackrel{iid}{\sim}U(0,1)$ ，$X_{1}+X_{2}$` 是否服从`$U(0,2)$` ？ 如果有一台电脑在旁边，我首先想到的就是敲三五行代码，画个散点图、直方图，看图说话。
 
 ```r
-set.seed(1234) 
-x <- runif(10000,min = 0,max = 1) 
-y <- runif(10000,min = 0,max = 1) 
+set.seed(1234)
+x <- runif(10000,min = 0,max = 1)
+y <- runif(10000,min = 0,max = 1)
 z <- x+y
 plot(z) # 散点图
 hist(z) # 直方图
@@ -160,7 +160,7 @@ hist(z) # 直方图
 
 ```r
 ggplot(data.frame(x = seq(10000), y = z), aes(x = x, y = y)) +   
-	geom_hex(show.legend=FALSE)+ 
+	geom_hex(show.legend=FALSE)+
 	scale_fill_viridis(direction = -1) + xlab("")+ylab("")
 ```
 ![fig2](/figures/img3.svg)
@@ -194,7 +194,7 @@ ks.test(sqrt(6)*(z-1),"pnorm") # 分布检验
 
 ## 精确分布的推导及计算
 
-课本如《概率论与数理统计教程》 采用卷积的方法求分布函数，这种方法实行起来比较繁琐，也不利于后续编程，下面考虑用特征函数的方法求。我们知道标准均匀分布的特征函数`$$\varphi(t)=\frac{e^{it}-1}{it}$$`考虑`$X_1$`和`$X_2$`相互独立，它们的和用`$S_2$`表示，则随机变量`$S_2$`的特征函数为 `$$\varphi_2(t)=\varphi(t)*\varphi(t)=(\frac{e^{it}-1}{it})^2=\frac{2(1-\cos(t))e^{it}}{t^2}$$` 
+课本如《概率论与数理统计教程》 采用卷积的方法求分布函数，这种方法实行起来比较繁琐，也不利于后续编程，下面考虑用特征函数的方法求。我们知道标准均匀分布的特征函数`$$\varphi(t)=\frac{e^{it}-1}{it}$$`考虑`$X_1$`和`$X_2$`相互独立，它们的和用`$S_2$`表示，则随机变量`$S_2$`的特征函数为 `$$\varphi_2(t)=\varphi(t)*\varphi(t)=(\frac{e^{it}-1}{it})^2=\frac{2(1-\cos(t))e^{it}}{t^2}$$`
 
 只要满足条件
 
@@ -211,14 +211,14 @@ ks.test(sqrt(6)*(z-1),"pnorm") # 分布检验
 `$$p_2(x)=\frac{1}{2 \pi}\int_{-\infty}^{+\infty}\mathrm{e}^{-itx}\varphi_2(t)\mathrm{d}t=\frac{2}{\pi}\int_{0}^{+\infty}\frac{(1-\cos(t))\cos(t(1-x))}{t^2}\mathrm{d}t=\frac{2}{\pi}\int_{0}^{+\infty}\cos\big(2(1-x)t\big)\big(\frac{\sin(t)}{t}\big)^2\mathrm{d}t$$`
 一般地，`$n$`个独立随机变量的和
 `$$\varphi_n(t)=\big(\frac{e^{it}-1}{it}\big)^n=\big(\frac{\sin(t/2)\mathrm{e}^{\frac{it}{2}}}{t/2}\big)^n$$`
-那么，同理 
+那么，同理
 `$$p_n(x)=\frac{2}{\pi}\int_{0}^{+\infty}\cos\big(2(n/2-x)t\big)(\frac{\sin(t)}{t})^n\mathrm{d}t$$`
 
 要说数值计算一个$p(x)$近似值，是一点问题没有！且看
 
 ```r
 integrate(function(t,x,n) 2/pi*cos((n-2*x)*t)*(sin(t)/t)^n ,x = 1,n = 2,
-			lower = 0,upper = Inf,subdivisions = 1000) 
+			lower = 0,upper = Inf,subdivisions = 1000)
 ## 0.9999846 with absolute error < 6.6e-05			
 ```
 
@@ -228,7 +228,7 @@ integrate(function(t,x,n) 2/pi*cos((n-2*x)*t)*(sin(t)/t)^n ,x = 1,n = 2,
 
 ```r
 fun_p2_1 <- function(x) { 1 / 2 * (abs(x - 2) - 2 * abs(x - 1) + abs(x)) }
-fun_p2_2 <- function(x) { 
+fun_p2_2 <- function(x) {
     x <- as.matrix(x)
     tempfun <- function(x) {
         integrate(function(t, x, n) 2 / pi * cos((n - 2 * x) * t) * (sin(t) / t) ^ n,
@@ -238,7 +238,7 @@ fun_p2_2 <- function(x) {
 }
 ggplot(data.frame(x = c(0, 2)), aes(x = x)) +
     stat_function(fun = fun_p2_2, geom = "point", colour = "#2A768EFF") +
-    stat_function(fun = fun_p2_1, geom = "line", colour = "#78D152FF") 
+    stat_function(fun = fun_p2_1, geom = "line", colour = "#78D152FF")
 ```
 
 ![fig2](/figures/img5.svg)
@@ -246,7 +246,7 @@ ggplot(data.frame(x = c(0, 2)), aes(x = x)) +
 从图中可以看出，两种形式的密度函数在数值计算的结果上很一致，当`$n=100,1000$`时，含参量积分的表示形式就很方便啦！任意给定一个`$n$`，符号计算上面的含参量积分，这个时候还是用软件计算比较合适，*R*的符号计算仅限于求导，积分运算需要借助Ryacas，rSymPy，可惜的是，这些包更新缓慢，即使 `$\int_{0}^{+\infty}\frac{\sin(at)}{t}\mathrm{d}t$`也算不出来，果断直接使用*Python*的sympy模块
 
 ```python
-from sympy import * 
+from sympy import *
 a=symbols('a', real=True)
 t=symbols('t', real=True,positive=True)
 print(integrate(sin(a*t)/t,(t,0,oo)))
@@ -258,7 +258,7 @@ print(integrate(sin(a*t)/t,(t,0,oo)))
 
 
 \begin{equation*}
-\begin{cases} 
+\begin{cases}
 \frac{\pi}{2} & \text{for}\: \left|{\operatorname{periodic_{argument}}{\left (\operatorname{polar\_lift}^{2}{\left (a \right )},\infty \right )}}\right| = 0 \\
 \int\limits_{0}^{\infty} \frac{1}{t} \sin{\left (a t \right )}\, dt & \text{otherwise} \end{cases}
 \end{equation*}
@@ -266,7 +266,7 @@ print(integrate(sin(a*t)/t,(t,0,oo)))
 稍为好点，但是还是有一大块看不懂，那个绝对值里是什么？还是不要纠结了，路远坑多，慢走不送啊！话说要是计算`$p_2(x)$`密度函数里的积分，
 
 ```python
-from sympy import * 
+from sympy import *
 x=symbols('x', real=True)
 t=symbols('t', real=True,positive=True)
 print(integrate(2/pi*cos(2*t*(1-x))*(sin(t)/t)**2,(t,0,oo)))
@@ -277,12 +277,12 @@ print(integrate(2/pi*cos(2*t*(1-x))*(sin(t)/t)**2,(t,0,oo)))
 那就更长了。。。
 
 \begin{equation*}
-\begin{cases} 
-\frac{1}{2} \begin{cases} 
+\begin{cases}
+\frac{1}{2} \begin{cases}
 2 x & \text{for}\: \frac{1}{4} \left(2 x - 2\right)^{2} < 1 \\
 0 & \text{for}\: \frac{4}{\left(2 x - 2\right)^{2}} < 1 \\
 {G_{4, 4}^{3, 1}\left(\begin{matrix} \frac{1}{2} & 1, 1, \frac{3}{2} \\\frac{1}{2}, 1, 0 & \frac{1}{2} \end{matrix} \middle| {\frac{1}{4} \operatorname{polar\_lift}^{2}{\left (- 2 x + 2 \right )}} \right)} & \text{otherwise} \end{cases} & \text{for}\: \left|{\operatorname{periodic_{argument}}{\left (\operatorname{polar\_lift}^{2}{\left (- 2 x + 2 \right )},\infty \right )}}\right| = 0 \\
-\int\limits_{0}^{\infty} \frac{2}{\pi t^{2}} \sin^{2}{\left (t \right )} \cos{\left (2 t \left(- x + 1\right) \right )}\, dt & \text{otherwise} 
+\int\limits_{0}^{\infty} \frac{2}{\pi t^{2}} \sin^{2}{\left (t \right )} \cos{\left (2 t \left(- x + 1\right) \right )}\, dt & \text{otherwise}
 \end{cases}
 \end{equation*}
 
@@ -293,5 +293,3 @@ integrate 2/pi*cos(2*t*(1-x))*(sin(t)/t)^2 ,t ,0,oo
 ```
 
 即可得`$p_2(x)=\frac{1}{2}(\left | x-2 \right |-2\left | x-1 \right |+\left | x \right |)$`，`$n$` 取任意值都是可以算的，由于式子比较复杂，就不展示了。
-
-
