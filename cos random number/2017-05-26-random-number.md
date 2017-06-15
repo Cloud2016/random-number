@@ -16,7 +16,7 @@ slug: random number generation and its application to statistical simulation
 
 # 随机数生成
 
-讲随机数发生器，不得不提及Mersenne Twister（简称MT），它的周期长达`$2^{19937}-1$`， 现在是R 、Octave 和Matlab 等软件（较新版本）的默认随机数发生器。 在产生`$2^{24}$`个随机数的过程中，[MT发生器的C语言64位版本](http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt64.html)，我在 Dev-C++ 5.11  上编译运行10秒左右（包含编译和写随机数到文件的时间，实际产生随机数的时间应该远小于这个时间）。
+讲随机数发生器，不得不提及一个名为Mersenne Twister（简称MT）的发生器，它的周期长达`$2^{19937}-1$`， 现在是R 、Octave 和Matlab 等软件（较新版本）的默认随机数发生器。 只需要编译运行10秒左右，在产生的过程中，[MT发生器](http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt64.html)就可以生成`$2^{24}$`个随机数（版本为C语言64位版本，环境Dev-C++ 5.11）。其中包含编译和写随机数到文件的时间，实际产生随机数的时间应该远小于这个时间。
 
 Matlab新版本内置了早期的随机数发生器（这里以1995年的Matlab随机数发生器为例），两行代码就可以产生 `$2^{24}$` 个随机数。
 
@@ -66,7 +66,7 @@ ggplot(data.frame(x = seq(1000), y = corr), aes(x = x, y = y)) +
 	scale_fill_viridis(direction = -1) + xlab("Sample size *10^3")+ylab("Correlation")
 ```
 
-![fig1](/figures/img1.svg)
+![fig1](/figures/img1.png)
 
 ## 分布检验
 
@@ -110,7 +110,8 @@ runs.test(factor(x))
 ## alternative hypothesis: two.sided
 ```
 
-我们现在拿 *Matlab* 早期随机数发生器、*R* 内置的Mersenne-Twister发生器和*C*语言实现的Mersenne-Twister发生器比较，程序实现仿[*Matlab*版的游程检验](https://www.mathworks.com/content/dam/mathworks/mathworks-dot-com/moler/random.pdf)。
+我们现在拿 *Matlab* 早期随机数发生器、*R* 内置的Mersenne-Twister发生器和*C*语言实现的Mersenne-Twister发生器比较。程序实现仿[*Matlab*版的游程检验](https://www.mathworks.com/content/dam/mathworks/mathworks-dot-com/moler/random.pdf)：
+先给定阈值delta为0.01（也可以取别的值），取出序列中的值小于delta的位置，位置序列前面添加0，再差分，然后每个值减1，得到新序列，新序列中的值为0，表明原序列连续两个值小于delta，新序列中的值为1，表明间隔1个数小于delta，新序列中的值为2，表明间隔2个数小于delta，依次类推.....统计所有的情况，用直方图显示（间隔数取到100足可示意）。
 
 ```r
 library(gridExtra)
@@ -118,7 +119,7 @@ library(R.matlab)
 # 游程频数直方图
 run_test_fun <- function(x,string,delta) {
   n <- length(x)
-  len <- diff(c(0,which(x<delta),n+1))-1
+  len <- diff(c(0,which(x<delta),n+1))-1 
   ggplot(data.frame(x=len[len < 101]),aes(x,fill=..count..)) +
   	scale_fill_viridis(direction = -1)+
   	geom_histogram(binwidth = 1,show.legend = FALSE) +
@@ -134,11 +135,11 @@ p2 <- run_test_fun(x = matlabv5_data$x,string = "Matlab v5",delta = 0.01)
 p3 <- run_test_fun(x = c_data,string = "C",delta = 0.01)
 grid.arrange(p1, p2, p3, ncol=3)
 ```
-![fig2](/figures/img2.svg)
+![fig2](/figures/img2.png)
 
-在游程长度为27的位置，有一条深沟，这是George Marsaglia 提出的借位相减（subtract-with-borrow）算法的特性，显然不符合随机性的要求，该算法细节参见[Cleve B. Moler的书《Numerical Computing with MATLAB》第9章第267页](https://www.mathworks.com/moler/chapters.html) 。
+从图中可以比较看出，在间隔为27的位置，有一条深沟。当时Matlab采用的是George Marsaglia 在1991年提出的借位相减（subtract-with-borrow）算法，取模32的运算和5一起消耗了间隔为27的游程，导致不符合随机性的要求，该算法细节参见[Cleve B. Moler](https://www.wikiwand.com/en/Cleve_Moler)的书《Numerical Computing with MATLAB》[第9章第267页](https://www.mathworks.com/moler/chapters.html) 。
 
-这里的借位相减是指序列的第`$i$`个随机数`$z_{i}$`要依据如下递推关系产生，`$$z_i=z_{i+20}-z_{i+5}-b$$`
+这里的借位相减是指序列的第`$i$`个随机数`$z_{i}$`要依据如下递推关系产生，`$$z_{i}=z_{i+20}-z_{i+5}-b$$`
 下标`$i,i+20,i+5$`都是对32取模的结果，`$b$`的取值与前一步有关，当`$z_i$`是正值时，下一步将`$b$`置为0，如果计算的`$z_i$`是负值，在保存`$z_i$`之前，将其值加1，并在下一步，将`$b$`的值设为`$2^{-53}$`。
 
 # 应用
@@ -156,14 +157,14 @@ plot(z) # 散点图
 hist(z) # 直方图
 ```
 
-为美观起见，多写了一行，图就可以长下面那样
+为美观起见，从[viridis包](https://cran.r-project.org/web/packages/viridis/index.html)调用viridis调色板，颜色越深的地方，相应的数值越大，不管是此处 geom_hex 绘制的六角形热图，还是 geom_histogram 绘制的直方图，都遵循这个规律。
 
 ```r
 ggplot(data.frame(x = seq(10000), y = z), aes(x = x, y = y)) +   
 	geom_hex(show.legend=FALSE)+
 	scale_fill_viridis(direction = -1) + xlab("")+ylab("")
 ```
-![fig2](/figures/img3.svg)
+![fig2](/figures/img3.png)
 
 显然这不是均匀分布，在 `$z=1$` 处，散点比较集中，看起来有点像正态分布，如果往中心极限定理上靠，将作如下标准化`$$Y_{2}^{\star}=\frac{X_1 + X_2 - 2*\frac{1}{2}}{\sqrt{\frac{1}{12}}*\sqrt{2}}=\sqrt{6}(X_1 + X_2 -1)$$` 则$Y_{2}^{\star}$的期望为0，方差为1。
 
@@ -176,7 +177,7 @@ p5 <- ggplot(data.frame(x=sqrt(6)*(z-1)),aes(x,fill=..count..))+
 	geom_histogram(bins=20,show.legend=FALSE) + xlab("")+ylab("")  
 grid.arrange(p4, p5,  ncol=2)
 ```
-![fig2](/figures/img4.svg)
+![fig2](/figures/img4.png)
 
 只是变换后的图像和之前基本一致，那么现在看来眼球检验不好使了，那就上`$P$`值呗！
 
@@ -241,7 +242,7 @@ ggplot(data.frame(x = c(0, 2)), aes(x = x)) +
     stat_function(fun = fun_p2_1, geom = "line", colour = "#78D152FF")
 ```
 
-![fig2](/figures/img5.svg)
+![fig2](/figures/img5.png)
 
 从图中可以看出，两种形式的密度函数在数值计算的结果上很一致，当`$n=100,1000$`时，含参量积分的表示形式就很方便啦！任意给定一个`$n$`，符号计算上面的含参量积分，这个时候还是用软件计算比较合适，*R*的符号计算仅限于求导，积分运算需要借助Ryacas，rSymPy，可惜的是，这些包更新缓慢，即使 `$\int_{0}^{+\infty}\frac{\sin(at)}{t}\mathrm{d}t$`也算不出来，果断直接使用*Python*的sympy模块
 
@@ -293,3 +294,9 @@ integrate 2/pi*cos(2*t*(1-x))*(sin(t)/t)^2 ,t ,0,oo
 ```
 
 即可得`$p_2(x)=\frac{1}{2}(\left | x-2 \right |-2\left | x-1 \right |+\left | x \right |)$`，`$n$` 取任意值都是可以算的，由于式子比较复杂，就不展示了。
+
+# 小结
+
+1. 现在，R、Octave和Matlab这些软件没有单纯用借位相减算法来产生随机数，1995年后，Matlab使用延迟斐波那契和移位寄存器的组合发生器，直到2007年，Matlab推出7.4版本的时候才采用MT发生器。
+2. 随机数的检验是有一套标准的，如 George Marsaglia 开发的 DieHard 检验程序，检验的内容很丰富，这篇文章只能算初窥门径，R内产生真随机数的包是 [Dirk Eddelbuettel](http://dirk.eddelbuettel.com/) 开发的 [random](https://cran.r-project.org/web/packages/random/)包，它是连接产生[真随机数网站](https://www.random.org/)的接口。
+3. Python的符号计算模块sympy功能比较全，但是化简比较弱，导致结果理解起来不是很方便，比如第二个式子的第一行，看似当`$0<x<2$`时,`$p_{2}(x)$=x`是错的，正确的范围应该是`$0<x<1$`，其实for后面的函数 `$polar\_lift()$`要求参数大于0，这样就没问题了，建议多撸一撸[sympy官方文档](http://docs.sympy.org/latest/index.html?v=20170321095755)。
