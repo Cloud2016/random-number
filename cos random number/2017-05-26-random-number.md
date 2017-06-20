@@ -67,7 +67,7 @@ SWB发生器中“借位相减”步骤是指序列的第`$i$`个随机数`$z_{i
 
 下面关于随机数生成的效率和后面的统计检验，都以生成`$2^{24}$`个为基准，是1600多万个，取这么多，一方面为了比较编程语言实现的发生器产生随机数的效率，另一方面是后面的游程检验需要比较大的样本量。
 
-Matlab内置的发生器及大部分的函数，底层实现都是C或者Fortran，MathWorks创始人[Cleve B. Moler](https://www.wikiwand.com/en/Cleve_Moler)是数值分析领域LINPACK和EISPACK包的作者之一，他当年做了很多优化和封装，进而推出Matlab，只要是调用内置函数，效率不会比C差，自己写的含有循环、判断等语句的代码，性能就因人而异了，对大多数人来说，性能要比C低。这里比较Matlab内置SWB发生器（就当作是C语言实现的好了）和用Matlab重写的SWB发生器的效率，代码如下：
+Matlab内置的发生器及大部分的函数，底层实现都是C或者Fortran，MathWorks创始人[Cleve B. Moler](https://www.wikiwand.com/en/Cleve_Moler)是数值分析领域著名的LINPACK和EISPACK包的作者之一，他当年做了很多优化和封装，进而推出Matlab，只要是调用内置函数，效率不会比C差，自己写的含有循环、判断等语句的代码，性能就因人而异了，对大多数人来说，性能要比C低。这里比较Matlab内置SWB发生器（就当作是C语言实现的好了）和用Matlab重写的SWB发生器的效率，代码如下：
 ```matlab
 % matlab code
 tic % 大约几秒
@@ -82,7 +82,7 @@ randtx('state',0)
 x = randtx(1,2^24);
 toc (id)
 ```
-[randtx](https://www.mathworks.com/moler/chapters.html)不是Matlab和Octave内置的函数，而是Cleve B. Moler基于Matlab实现的SWB发生器，也是100多行包含嵌套循环等语句的Matlab代码打包的函数，上面的代码运行时间差异之大也就不难理解了，为了能在Octave上跑，我做了少量修改，Octave软件版本为4.2.1，安装Octave时，Blas选择OpenBlas，为了后续检验，在获得随机数后，将其保存到磁盘文件random\_number.mat
+[randtx](https://www.mathworks.com/moler/chapters.html)不是Matlab和Octave内置的函数，而是Cleve B. Moler基于Matlab实现的SWB发生器，也是100多行包含嵌套循环等语句的Matlab代码打包的函数，上面的代码运行时间差异之大也就不难理解了，为了能在Octave上跑，我做了少量修改，Octave软件版本为4.2.1，安装Octave时，Blas选择OpenBlas，为了后续检验，在获得随机数后，将其保存到磁盘文件 random\_number.mat
 ```octave
 save -mat random_number.mat x 
 ```
