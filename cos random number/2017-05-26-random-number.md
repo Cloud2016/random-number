@@ -25,12 +25,12 @@ rng(1234, 'v5uniform')
 Octave通过内置的rand函数指定发生器的不同状态，为获取相同的两组随机数，state参数得设置一样，如1234（你也可以设置为别的值）。Octave已经放弃了老版本内置的发生器，找不到命令去指定早期的发生器，这个和Matlab不一样。
 
 ```octave
-rand ("state",1234)
+rand ('state',1234)
 rand(1,5)
 
    0.9664535   0.4407326   0.0074915   0.9109760   0.9392690
 
-rand ("state",1234)
+rand ('state',1234)
 rand(1,5)
 
    0.9664535   0.4407326   0.0074915   0.9109760   0.9392690
@@ -78,7 +78,7 @@ toc
 ```octave
 % octave code
 id = tic % 时间耗费大约一小时
-randtx("state",0)
+randtx('state',0)
 x = randtx(1,2^24);
 toc (id)
 ```
@@ -102,10 +102,10 @@ library(viridisLite)
 library(viridis)
 set.seed(1234)
 corr <- rep(0,1000)
-for(i in seq(from=1000,to=1000000,by=1000)){  
-	corr[i/1000] <-  cor.test(runif(i,min = 0,max = 1),                            
+for(i in seq(from=1000,to=1000000,by=1000)){
+	corr[i/1000] <-  cor.test(runif(i,min = 0,max = 1),
 		runif(i,min = 0,max = 1))$estimate }
-ggplot(data.frame(x = seq(1000), y = corr), aes(x = x, y = y)) +   
+ggplot(data.frame(x = seq(1000), y = corr), aes(x = x, y = y)) +
 	geom_hex(show.legend=FALSE)+
 	scale_fill_viridis(direction = -1) + xlab("Sample size *10^3")+ylab("Correlation")
 ```
