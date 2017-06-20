@@ -2,55 +2,106 @@
 title: 随机数生成及其在统计模拟中的应用
 date: '2017-05-26'
 author: 黄湘云
-tags: [随机数,统计检验，模拟]
+tags: [随机数，统计检验，模拟]
 slug: random number generation and its application to statistical simulation
 ---
 
 # 引言
 
-揭秘统计软件如R，Octave，Matlab等使用的随机数发生器，然后做一些统计检验，再将其应用到独立随机变量和的模拟中，最后与符号计算得到的精确结果比较。
+揭秘统计软件如R，Octave，Matlab等使用的随机数发生器，然后做一些统计检验，再将其应用到独立随机变量和的模拟中，最后与符号计算得到的精确结果比较。除特别说明外，文中涉及到的随机数都是指伪随机数，发生器都是指随机数发生器。
 
 # 背景
 
-随机数的产生和检验方法是蒙特卡罗方法的重要部分，另外两个是概率分布抽样方法和降低方差提高效率方法。在20世纪40年代中期，当时为了原子弹的研制，乌拉姆（S.Ulam）、冯诺依曼（J.von Neumann） 和梅特罗波利斯（N. Metropolis） 在美国核武器研究实验室创立蒙特卡罗方法。BTW，当时出于保密的需要，与随机模拟相关的技术就代号“蒙特卡罗”。早期取得的成果有产生随机数的平方取中方法，取舍算法和逆变换法等。这两个算法的内容[见统计之都王夜笙的文章](http://cos.name/2015/06/generating-normal-distr-variates/)。
+随机数的产生和检验方法是蒙特卡罗方法的重要部分，另外两个是概率分布抽样方法和降低方差提高效率方法。在20世纪40年代中期，当时为了原子弹的研制，乌拉姆（S.Ulam）、冯诺依曼（J.von Neumann） 和梅特罗波利斯（N. Metropolis） 在美国核武器研究实验室创立蒙特卡罗方法。BTW，当时出于保密的需要，与随机模拟相关的技术就代号“蒙特卡罗”。早期取得的成果有产生随机数的平方取中方法，取舍算法和逆变换法等。这两个算法的内容见统计之都[王夜笙的文章](http://cos.name/2015/06/generating-normal-distr-variates/)。
 
 # 随机数生成
 
-讲随机数发生器，不得不提及一个名为Mersenne Twister（简称MT）的发生器，它的周期长达`$2^{19937}-1$`， 现在是R 、Octave 和Matlab 等软件（较新版本）的默认随机数发生器。 只需要编译运行10秒左右，在产生的过程中，[MT发生器](http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt64.html)就可以生成`$2^{24}$`个随机数（版本为C语言64位版本，环境Dev-C++ 5.11）。其中包含编译和写随机数到文件的时间，实际产生随机数的时间应该远小于这个时间。
-
-Matlab新版本内置了早期的随机数发生器（这里以1995年的Matlab随机数发生器为例），两行代码就可以产生 `$2^{24}$` 个随机数。
+讲随机数生成，不得不提及一个名为Mersenne Twister（简称MT）的发生器，它的周期长达`$2^{19937}-1$`， 现在是R 、Octave 和Matlab 等软件的默认发生器。Matlab通过内置的rng函数指定不同的发生器，其中包括1995年Matlab采用George Marsaglia 在1991年提出的借位减（subtract with borrow，简称SWB）发生器。在Matlab中，设置如下命令可指定发生器及其状态，其中1234是随机数种子，指定发生器的状态，目的是重复实验结果，v5uniform是发生器的名字。
 
 ```matlab
-% matlab code % 大约几秒
 rng(1234, 'v5uniform')
-x = rand(1,2^24);
 ```
 
-[randtx](https://www.mathworks.com/moler/chapters.html )是实现这个随机数发生器的源代码（打包在 NCM 工具箱内），我把代码略作改动以适应在 Octave 中运行（没有 Matlab 照样玩得转），下面在 Octave 内产生可重复的随机数 `$2^{24}$`  个（1600多万），保存成 mat 格式文件，方便后续检验使用。这一番从 Matlab 到 Octave 的折腾，只是为了避免使用 Matlab 而已，再说 Octave 对 Matlab 的兼容性很高（涉及GUI编程的代码是不兼容的，Octave 貌似只专注计算<http://www.gnu.org/software/octave/about.html>）。
+Octave通过内置的rand函数指定发生器的不同状态，为获取相同的两组随机数，state参数得设置一样，如1234（你也可以设置为别的值）。Octave已经放弃了老版本内置的发生器，找不到命令去指定早期的发生器，这个和Matlab不一样。
 
+```octave
+rand ("state",1234)
+rand(1,5)
+
+ans =
+
+   0.9664535   0.4407326   0.0074915   0.9109760   0.9392690
+
+rand ("state",1234)
+rand(1,5)
+
+ans =
+
+   0.9664535   0.4407326   0.0074915   0.9109760   0.9392690
+```
+
+Python的numpy模块也采用MT发生器，类似地，通过如下方式获得相同的两组随机数
+
+```python
+In [1]: import numpy as np
+
+In [2]: a = np.random.RandomState(1234)
+
+In [3]: a.rand(5)
+Out[3]: array([ 0.19151945,  0.62210877,  0.43772774,  0.78535858,  0.77997581])
+
+In [4]: a = np.random.RandomState(1234)
+
+In [5]: a.rand(5)
+Out[5]: array([ 0.19151945,  0.62210877,  0.43772774,  0.78535858,  0.77997581])
+```
+
+R的默认发生器也是MT发生器，除了设置随机数种子的seed参数，还可以通过kind参数指定其他发生器，normal.kind参数指定产生正态分布随机数的发生器，下面也使用类似的方式产生两组完全一样的随机数。
+
+```r
+set.seed(seed, kind = NULL, normal.kind = NULL)
+set.seed(1234,kind = "Mersenne-Twister", normal.kind =  "Inversion") # 默认参数设置
+runif(5)
+[1] 0.1137034 0.6222994 0.6092747 0.6233794 0.8609154
+
+set.seed(1234,kind = "Mersenne-Twister", normal.kind =  "Inversion") # 默认参数设置
+runif(5)
+[1] 0.1137034 0.6222994 0.6092747 0.6233794 0.8609154
+```
+
+SWB发生器中“借位相减”步骤是指序列的第`$i$`个随机数`$z_{i}$`要依据如下递推关系产生，`$$z_{i}=z_{i+20}-z_{i+5}-b$$`
+下标`$i,i+20,i+5$`都是对32取模的结果，`$z_{i+20}$`与`$z_{i+5}$`做减法运算，`$b$`是借位，其取值与前一步有关，当`$z_i$`是正值时，下一步将`$b$`置为0，如果计算的`$z_i$`是负值，在保存`$z_i$`之前，将其值加1，并在下一步，将`$b$`的值设为`$2^{-53}$`。
+
+下面关于随机数生成的效率和后面的统计检验，都以生成`$2^{24}$`个为基准，是1600多万个，取这么多，一方面为了比较编程语言实现的发生器产生随机数的效率，另一方面是后面的游程检验需要比较大的样本量。
+
+Matlab内置的发生器及大部分的函数，底层实现都是C或者Fortran，MathWorks创始人[Cleve B. Moler](https://www.wikiwand.com/en/Cleve_Moler)是数值分析领域LINPACK和EISPACK包的作者之一，他当年做了很多优化和封装，进而推出Matlab，只要是调用内置函数，效率不会比C差，自己写的含有循环、判断等语句的代码，性能就因人而异了，对大多数人来说，性能要比C低。这里比较Matlab内置SWB发生器（就当作是C语言实现的好了）和用Matlab重写的SWB发生器的效率，代码如下：
+```matlab
+% matlab code
+tic % 大约几秒
+rng(1234, 'v5uniform') % 调用SWB发生器
+x = rand(1,2^24);
+toc
+```
 ```octave
 % octave code
 id = tic % 时间耗费大约一小时
 randtx("state",0)
 x = randtx(1,2^24);
 toc (id)
-save -mat random_number.mat x # 保存随机数到文件
 ```
-
-目前Matlab和Octave产生随机数的代码是一样的，内置的随机数发生器也是一样的
+[randtx](https://www.mathworks.com/moler/chapters.html)不是Matlab和Octave内置的函数，而是Cleve B. Moler基于Matlab实现的SWB发生器，也是100多行包含嵌套循环等语句的Matlab代码打包的函数，上面的代码运行时间差异之大也就不难理解了，为了能在Octave上跑，我做了少量修改，Octave软件版本为4.2.1，安装Octave时，Blas选择OpenBlas，为了后续检验，在获得随机数后，将其保存到磁盘文件random\_number.mat
 ```octave
-rand(m,n) % 产生m行n列的服从标准均与分布的随机数
+save -mat random_number.mat x 
 ```
-R产生随机数的代码也是简短，默认的随机数发生器也是MT。
-```r
-runif(n) # 产生n个服从标准均匀分布的随机数
-```
+R，Octave，Matlab和Python内置的发生器都是MT发生器，与之实现有关的数学库，也是Blas，虽然有开源和进一步优化的商业版本之分，，但是矩阵乘法，向量乘法之类运算的效率也就半斤八两，Julia语言官网给出了一个[标准测试](https://julialang.org/)。这里再给出用C语言实现的[MT发生器](http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt64.html)，产生同样多的随机数，只需要10秒左右，其中包含编译和写随机数到文件的时间，实际产生随机数的时间应该远小于这个时间。（程序运行环境环境Dev-C++ 5.11，用64位的GCC编译）。
 
 # 统计检验
 
+随机数的检验是有一套标准的，如 George Marsaglia 开发的 DieHard 检验程序，检验的内容很丰富，相应的R包是[RDieHarder](https://cran.r-project.org/web/packages/RDieHarder/)，这篇文章只能算初窥门径，R内产生真随机数的包是 [Dirk Eddelbuettel](http://dirk.eddelbuettel.com/) 开发的 [random](https://cran.r-project.org/web/packages/random/)包，它是连接产生[真随机数网站](https://www.random.org/)的接口。
+
 ## 相关性检验
 
-先来一个简单的，就用 *R* 产生的两个独立同均匀分布样本，调用 **cor.test** 做相关性检验，然后眼球验证一下，随着样本量增大，相关性趋于0。
+先来一个简单的，就用 R 产生的两个独立同均匀分布样本，调用 cor.test 做相关性检验，看看这两组数是不是足够独立同分布，通过眼球验证，随着样本量增大，相关性趋于0，相关性弱到可以视为独立。如下图所示
 
 ```r
 library(ggplot2)
@@ -92,11 +143,13 @@ ks.test(runif(1000),runif(1000)) # 同分布检验
 ## D = 0.04, p-value = 0.4005
 ## alternative hypothesis: two-sided
 ```
-从结果来看，*R*内置的随机数发生器通过了检验（嘿嘿，这是肯定的！！）。
+从结果来看，R内置的随机数发生器通过了检验（嘿嘿，这是肯定的！！）。
 
 ## 游程检验
 
-游程检验对随机数的随机性检验就相对严格，是一种非参数检验。先略作解释，简单起见，我们考虑0-1序列，抛掷均匀的硬币1000次，正面向上记为1，反面向上记为0，这是一个离散的均匀分布，每一次抛掷硬币都无法准确地判断出现的是正面还是反面，若记录的序列中0和1相对集中的出现，显然不是随机，0和1交替出现，呈现周期性也不是随机，除了这两种情况基本就是随机了。游程检验的原假设是序列随机的，当计算的P值比较大时，不能拒绝原假设，即不能否认这个序列是随机的。
+游程检验对随机数序列的随机性检验，不对序列做任何分布假设，不同于上面的相关性检验和省略没讲的特征统计量（如均值和方差）的检验。先对随机性略作解释，简单起见，我们考虑0-1序列，抛掷均匀的硬币1000次，正面向上记为1，反面向上记为0，这是一个离散的均匀分布，每一次抛掷硬币都无法准确地判断出现的是正面还是反面，若记录的序列中0和1相对集中的出现，不是随机，0和1交替出现，呈现周期性也不是随机，除了这两种情况基本就是随机了。
+
+游程检验的原假设是序列满足随机性，序列一旦生成，就是有序的，因为游程检验需要固定位置，再数上升（下降）的游程数，当计算的P值比较大时，不能拒绝原假设，即不能否认这个序列是随机的。对上述0-1序列进行模拟，然后检验，如下所示
 
 ```r
 library(tseries)
@@ -110,8 +163,9 @@ runs.test(factor(x))
 ## alternative hypothesis: two.sided
 ```
 
-我们现在拿 *Matlab* 早期随机数发生器、*R* 内置的Mersenne-Twister发生器和*C*语言实现的Mersenne-Twister发生器比较。程序实现仿[*Matlab*版的游程检验](https://www.mathworks.com/content/dam/mathworks/mathworks-dot-com/moler/random.pdf)：
-先给定阈值delta为0.01（也可以取别的值），取出序列中的值小于delta的位置，位置序列前面添加0，再差分，然后每个值减1，得到新序列，新序列中的值为0，表明原序列连续两个值小于delta，新序列中的值为1，表明间隔1个数小于delta，新序列中的值为2，表明间隔2个数小于delta，依次类推.....统计所有的情况，用直方图显示（间隔数取到100足可示意）。
+现在用游程检验比较SWB发生器（Octave/Matlab版）、MT发生器（R语言版）和MT发生器（C语言版）。对于一般的实数序列，得先指定一个阈值，记为delta，然后比较序列中的值和delta的大小关系，这里类似数上升或下降的游程长度（runs length），基于这样一个事实：如果序列表现随机，则序列中两个小于delta的值，间隔越远出现的次数越少。可以这样理解，还是以上面抛硬币的例子来说，出现了很多次正面，那么下一次抛掷倾向于出现反面，这是一条人人可接受的经验。赌场里，电视里的骰子都被操纵了，即使先前一直开小，后面也没有开大的倾向，经验失效，这也是为什么赌徒会一直输。
+
+为了把这条经验可视化出来，对序列做如下操作：先给定阈值delta为0.01（也可以取别的值），取出序列中的值小于delta的位置，位置序列前面添加0，再差分，然后每个值减1，得到新序列，新序列中的值为0，表明原序列连续两个值小于delta，新序列中的值为1，表明间隔1个数小于delta，新序列中的值为2，表明间隔2个数小于delta，依次类推.....统计所有的情况，用直方图显示，这就获得游程长度与间隔的关系图（间隔数取到100足可示意）。
 
 ```r
 library(gridExtra)
@@ -137,10 +191,7 @@ grid.arrange(p1, p2, p3, ncol=3)
 ```
 ![fig2](/figures/img2.png)
 
-从图中可以比较看出，在间隔为27的位置，有一条深沟。当时Matlab采用的是George Marsaglia 在1991年提出的借位相减（subtract-with-borrow）算法，取模32的运算和5一起消耗了间隔为27的游程，导致不符合随机性的要求，该算法细节参见[Cleve B. Moler](https://www.wikiwand.com/en/Cleve_Moler)的书《Numerical Computing with MATLAB》[第9章第267页](https://www.mathworks.com/moler/chapters.html) 。
-
-这里的借位相减是指序列的第`$i$`个随机数`$z_{i}$`要依据如下递推关系产生，`$$z_{i}=z_{i+20}-z_{i+5}-b$$`
-下标`$i,i+20,i+5$`都是对32取模的结果，`$b$`的取值与前一步有关，当`$z_i$`是正值时，下一步将`$b$`置为0，如果计算的`$z_i$`是负值，在保存`$z_i$`之前，将其值加1，并在下一步，将`$b$`的值设为`$2^{-53}$`。
+从图中可以看出MT发生器通过了检验，SWT发生器没有通过，在间隔数为27的位置，有一条沟，按规律游程长度不应该减少这么多，这是因为SWB发生器“借位减”步骤，取模32的运算和5一起消耗了间隔为27的数量（读者可以按借位减的递推关系思考是如何消耗的），导致不符合随机性的要求，该算法细节参见[Cleve B. Moler](https://www.wikiwand.com/en/Cleve_Moler)的书《Numerical Computing with MATLAB》[第9章第267页](https://www.mathworks.com/moler/chapters.html) 。
 
 # 应用
 
@@ -157,7 +208,7 @@ plot(z) # 散点图
 hist(z) # 直方图
 ```
 
-为美观起见，从[viridis包](https://cran.r-project.org/web/packages/viridis/index.html)调用viridis调色板，颜色越深的地方，相应的数值越大，不管是此处 geom_hex 绘制的六角形热图，还是 geom_histogram 绘制的直方图，都遵循这个规律。
+为美观起见，从[viridis包](https://cran.r-project.org/web/packages/viridis/index.html)调用viridis调色板，颜色越深的地方，相应的数值越大，不管是此处 geom\_hex 绘制的六角形热图，还是 geom\_histogram 绘制的直方图，都遵循这个规律。
 
 ```r
 ggplot(data.frame(x = seq(10000), y = z), aes(x = x, y = y)) +   
@@ -244,7 +295,7 @@ ggplot(data.frame(x = c(0, 2)), aes(x = x)) +
 
 ![fig2](/figures/img5.png)
 
-从图中可以看出，两种形式的密度函数在数值计算的结果上很一致，当`$n=100,1000$`时，含参量积分的表示形式就很方便啦！任意给定一个`$n$`，符号计算上面的含参量积分，这个时候还是用软件计算比较合适，*R*的符号计算仅限于求导，积分运算需要借助Ryacas，rSymPy，可惜的是，这些包更新缓慢，即使 `$\int_{0}^{+\infty}\frac{\sin(at)}{t}\mathrm{d}t$`也算不出来，果断直接使用*Python*的sympy模块
+从图中可以看出，两种形式的密度函数在数值计算的结果上很一致，当`$n=100,1000$`时，含参量积分的表示形式就很方便啦！任意给定一个`$n$`，符号计算上面的含参量积分，这个时候还是用软件计算比较合适，R的符号计算仅限于求导，积分运算需要借助Ryacas，rSymPy，可惜的是，这些包更新缓慢，即使 `$\int_{0}^{+\infty}\frac{\sin(at)}{t}\mathrm{d}t$`也算不出来，果断直接使用Python的sympy模块
 
 ```python
 from sympy import *
@@ -298,5 +349,4 @@ integrate 2/pi*cos(2*t*(1-x))*(sin(t)/t)^2 ,t ,0,oo
 # 小结
 
 1. 现在，R、Octave和Matlab这些软件没有单纯用借位相减算法来产生随机数，1995年后，Matlab使用延迟斐波那契和移位寄存器的组合发生器，直到2007年，Matlab推出7.4版本的时候才采用MT发生器。
-2. 随机数的检验是有一套标准的，如 George Marsaglia 开发的 DieHard 检验程序，检验的内容很丰富，这篇文章只能算初窥门径，R内产生真随机数的包是 [Dirk Eddelbuettel](http://dirk.eddelbuettel.com/) 开发的 [random](https://cran.r-project.org/web/packages/random/)包，它是连接产生[真随机数网站](https://www.random.org/)的接口。
-3. Python的符号计算模块sympy功能比较全，但是化简比较弱，导致结果理解起来不是很方便，比如第二个式子的第一行，看似当`$0<x<2$`时,`$p_{2}(x)$=x`是错的，正确的范围应该是`$0<x<1$`，其实for后面的函数 `$polar\_lift()$`要求参数大于0，这样就没问题了，建议多撸一撸[sympy官方文档](http://docs.sympy.org/latest/index.html?v=20170321095755)。
+2. Python的符号计算模块sympy功能比较全，但是化简比较弱，导致结果理解起来不是很方便，比如第二个式子的第一行，看似当`$0<x<2$`时,`$p_{2}(x)$=x`是错的，正确的范围应该是`$0<x<1$`，其实for后面的函数 polar\_lift()要求参数大于0，这样就没问题了，建议多撸一撸[sympy官方文档](http://docs.sympy.org/latest/index.html?v=20170321095755)。
