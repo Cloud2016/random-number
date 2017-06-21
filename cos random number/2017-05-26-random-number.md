@@ -86,7 +86,9 @@ toc (id)
 ```octave
 save -mat random_number.mat x 
 ```
-R，Octave，Matlab和Python内置的发生器都是MT发生器，与之实现有关的数学库，也是Blas，虽然有开源和进一步优化的商业版本之分，，但是矩阵乘法，向量乘法之类运算的效率也就半斤八两，Julia语言官网给出了一个[标准测试](https://julialang.org/)。这里再给出用C语言实现的[MT发生器](http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt64.html)，产生同样多的随机数，只需要10秒左右，其中包含编译和写随机数到文件的时间，实际产生随机数的时间应该远小于这个时间。（程序运行环境环境Dev-C++ 5.11，用64位的GCC编译）。
+R，Octave，Matlab和Python内置的发生器都是MT发生器，与之实现有关的数学库，也是Blas，虽然有开源和进一步优化的商业版本之分，但是矩阵乘法，向量乘法之类运算的效率也就半斤八两，Julia语言官网给出了一个[标准测试](https://julialang.org/)。比较不同编程语言的性能（以C语言在算法中的表现为基准，时间记为1.0），rand\_mat\_mul 表示随机矩阵乘法运算
+
+这里再给出用C语言实现的[MT发生器](http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt64.html)，产生同样多的随机数，只需要10秒左右，其中包含编译和写随机数到文件的时间，实际产生随机数的时间应该远小于这个时间。（程序运行环境环境Dev-C++ 5.11，用64位的GCC编译）。
 
 # 统计检验
 
