@@ -2,10 +2,6 @@
 
 请见统计之都网站 <https://cosx.org/2017/05/random-number-generation/>
 
-
-
-计划第二篇多谈些
-
 # 随机数生成实践
 
 - RcppZiggurat: 'Rcpp' Integration of Different "Ziggurat" Normal RNG Implementations
