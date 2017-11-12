@@ -31,3 +31,6 @@
 - UnivRNG: Univariate Pseudo-Random Number Generation
 - StockChina: Real-Time Stock Price & Volume in China Market
 
+## 傅里叶积分
+
+ - An R package to compute Fourier integrals <https://journal.r-project.org/archive/2017/RJ-2017-044/RJ-2017-044.pdf>
